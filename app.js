@@ -25,7 +25,8 @@ const enterEmployeeDataPrompt = () => {
         ])
         .then(({enterNewEmployeeData}) => {
             if (enterNewEmployeeData === true) {
-                employeeTypePrompt();
+                // employeeTypePrompt();
+                generalEmployeeInfo();
             }
         })
         .catch((error) => {
@@ -35,7 +36,26 @@ const enterEmployeeDataPrompt = () => {
         })
 }
 
-const employeeTypePrompt = () => {
+const generalEmployeeInfo = () => {
+    inquirer
+        .prompt ([
+            {
+                type: `input`,
+                name: `employeeName`,
+                message: `Please enter employee's name.`,
+            },
+            {
+                type: `input`,
+                name: `employeeEmail`,
+                message: `Please enter employee's email address.`,
+            },
+        ])
+        .then((generalEmployeeAnswers) => {
+            employeeTypePrompt(generalEmployeeAnswers);
+        })
+}
+
+const employeeTypePrompt = (genEmpInfoAnswers) => {
     inquirer
         .prompt ([
             {
@@ -44,13 +64,13 @@ const employeeTypePrompt = () => {
                 message: `What type of team member are we gathering data for?`,
                 choices: [
                     `Intern`,
-                    `Employee`,
                     `Manager`,
                     `Engineer`
                 ],
             },
         ])
         .then(({employeeType}) => {
+            console.log(genEmpInfoAnswers);
             console.log(employeeType);
 
             switch(employeeType) {
@@ -58,14 +78,13 @@ const employeeTypePrompt = () => {
                     console.log(`Running ${employeeType} prompt`);
                     internPrompt();
                     break;
-                case `Employee`:
-                    console.log(`Run ${employeeType} Prompt`);
-                    break;
                 case `Manager`:
                     console.log(`Run ${employeeType} Prompt`);
+                    managerPrompt();
                     break;
                 case `Engineer`:
                     console.log(`Run ${employeeType} Prompt`);
+                    engineerPrompt();
                     break;
                 default:
                     console.log(`Let's try this again (run the main prompt again)`);
@@ -90,8 +109,8 @@ const internPrompt = () => {
                 message: `What school are you currently attending?`,
             },
         ])
-        .then((answers) => {
-            console.log(answers);
+        .then(({internSchool}) => {
+            console.log(internSchool);
             enterEmployeeDataPrompt();
         })
         .catch((error) => {
@@ -100,6 +119,46 @@ const internPrompt = () => {
             }
             else {
                 console.log(`Successfully gathered Intern Data.`);
+            }
+        })
+}
+
+const managerPrompt = () => {
+    inquirer
+        .prompt([
+            {
+                type: `input`,
+                name: `mgrOfficeNum`,
+                message: `Please enter their Office Number`,
+            },
+        ])
+        .then(({mgrOfficeNum}) => {
+            console.log(mgrOfficeNum);
+            enterEmployeeDataPrompt();
+        })
+        .catch((error) => {
+            if (error) {
+                throw error;
+            };
+        })
+}
+
+const engineerPrompt = () => {
+    inquirer
+        .prompt([
+            {
+                type: `input`,
+                name: `GHUser`,
+                message: `Please enter their GitHub username.`,
+            }
+        ])
+        .then(({GHUser}) => {
+            console.log(GHUser);
+            enterEmployeeDataPrompt();
+        })
+        .catch((error) => {
+            if (error) {
+                throw error;
             }
         })
 }
