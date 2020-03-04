@@ -12,6 +12,8 @@ const render = require("./lib/htmlRenderer");
 
 let employeeIDCounter = 1;
 
+const teamMemberArr = [];
+
 // FUNCTIONS
 //==================================================================================================================
 // Write code to use inquirer to gather information about the development team members,
@@ -21,14 +23,18 @@ const enterEmployeeDataPrompt = () => {
         .prompt([
             {
                 type: `confirm`,
-                name: `enterNewEmployeeData`,
+                name: `enterNewEmployee`,
                 message: `Would you like to enter data for a new Dev Team Member?`,
             }
         ])
-        .then(({enterNewEmployeeData}) => {
-            if (enterNewEmployeeData === true) {
+        .then(({enterNewEmployee}) => {
+            if (enterNewEmployee === true) {
                 generalEmployeeInfo();
             }
+            else if (enterNewEmployee === false && teamMemberArr.length > 0) {
+                writeToHTML();
+            }
+            
         })
         .catch((error) => {
             if (error) {
@@ -51,12 +57,12 @@ const generalEmployeeInfo = () => {
                 message: `Please enter employee's email address.`,
             },
         ])
-        .then((generalEmployeeAnswers) => {
-            employeeTypePrompt(generalEmployeeAnswers);
+        .then((generalAnswers) => {
+            employeeTypePrompt(generalAnswers);
         })
 }
 
-const employeeTypePrompt = (genEmpInfoAnswers) => {
+const employeeTypePrompt = (genEmpInfo) => {
     inquirer
         .prompt ([
             {
@@ -65,8 +71,8 @@ const employeeTypePrompt = (genEmpInfoAnswers) => {
                 message: `What type of team member are we gathering data for?`,
                 choices: [
                     `Intern`,
+                    `Engineer`,
                     `Manager`,
-                    `Engineer`
                 ],
             },
         ])
@@ -74,13 +80,13 @@ const employeeTypePrompt = (genEmpInfoAnswers) => {
 
             switch(employeeType) {
                 case `Intern`:
-                    internPrompt(genEmpInfoAnswers);
-                    break;
-                case `Manager`:
-                    managerPrompt(genEmpInfoAnswers);
+                    internPrompt(genEmpInfo);
                     break;
                 case `Engineer`:
-                    engineerPrompt(genEmpInfoAnswers);
+                    engineerPrompt(genEmpInfo);
+                    break;
+                case `Manager`:
+                    managerPrompt(genEmpInfo);
                     break;
                 default:
                     console.log(`Let's try this again (run the main prompt again)`);
@@ -108,9 +114,12 @@ const internPrompt = (basicEmpInfo) => {
         .then(({internSchool}) => {
             const intern = new Intern(employeeIDCounter, basicEmpInfo.employeeName, basicEmpInfo.employeeEmail, internSchool);
 
+            teamMemberArr.push(intern);
+            console.log(teamMemberArr);
+
             employeeIDCounter++;
 
-            console.log(`intern obj`, intern);
+            // console.log(`intern obj`, intern);
 
             enterEmployeeDataPrompt();
         })
@@ -118,35 +127,6 @@ const internPrompt = (basicEmpInfo) => {
             if (error) {
                 throw error;
             }
-            else {
-                console.log(`Successfully gathered Intern Data.`);
-            }
-        })
-}
-
-const managerPrompt = (basicEmpInfo) => {
-    inquirer
-        .prompt([
-            {
-                type: `input`,
-                name: `mgrOfficeNum`,
-                message: `Please enter their Office Number`,
-            },
-        ])
-        .then(({mgrOfficeNum}) => {
-            // console.log(mgrOfficeNum);
-            const manager = new Manager(employeeIDCounter, basicEmpInfo.employeeName, basicEmpInfo.employeeEmail, mgrOfficeNum);
-
-            employeeIDCounter++;
-
-            console.log(`new mgr obj`, manager);
-
-            enterEmployeeDataPrompt();
-        })
-        .catch((error) => {
-            if (error) {
-                throw error;
-            };
         })
 }
 
@@ -162,9 +142,13 @@ const engineerPrompt = (basicEmpInfo) => {
         .then(({GHUser}) => {
             const engineer = new Engineer(employeeIDCounter, basicEmpInfo.employeeName, basicEmpInfo.employeeEmail, GHUser);
 
+            teamMemberArr.push(engineer);
+            console.log(teamMemberArr);
+
             employeeIDCounter++;
 
-            console.log(`engineer obj`, engineer);
+            // console.log(`engineer obj`, engineer);
+
             enterEmployeeDataPrompt();
         })
         .catch((error) => {
@@ -172,6 +156,43 @@ const engineerPrompt = (basicEmpInfo) => {
                 throw error;
             }
         })
+}
+
+const managerPrompt = (basicEmpInfo) => {
+    inquirer
+        .prompt([
+            {
+                type: `input`,
+                name: `mgrOfficeNum`,
+                message: `Please enter their Office Number`,
+            },
+        ])
+        .then(({mgrOfficeNum}) => {
+            const manager = new Manager(employeeIDCounter, basicEmpInfo.employeeName, basicEmpInfo.employeeEmail, mgrOfficeNum);
+
+            teamMemberArr.push(manager);
+            console.log(teamMemberArr);
+
+            employeeIDCounter++;
+
+            // console.log(`new mgr obj`, manager);
+
+            enterEmployeeDataPrompt();
+        })
+        .catch((error) => {
+            if (error) {
+                throw error;
+            };
+        })
+}
+
+const writeToHTML = () => {
+    return fs.writeFile(outputPath, render(teamMemberArr), (error) => {
+        if (error) {
+            throw error
+        }
+        console.log(`Successfully created Team Member HTML.`);
+    })
 }
 
 // After the user has input all employees desired, call the `render` function (required
