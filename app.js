@@ -10,6 +10,8 @@ const OUTPUT_DIR = path.resolve(__dirname, "output");
 const outputPath = path.join(OUTPUT_DIR, "team.html");
 const render = require("./lib/htmlRenderer");
 
+let employeeIDCounter = 1;
+
 // FUNCTIONS
 //==================================================================================================================
 // Write code to use inquirer to gather information about the development team members,
@@ -25,7 +27,6 @@ const enterEmployeeDataPrompt = () => {
         ])
         .then(({enterNewEmployeeData}) => {
             if (enterNewEmployeeData === true) {
-                // employeeTypePrompt();
                 generalEmployeeInfo();
             }
         })
@@ -70,21 +71,16 @@ const employeeTypePrompt = (genEmpInfoAnswers) => {
             },
         ])
         .then(({employeeType}) => {
-            console.log(genEmpInfoAnswers);
-            console.log(employeeType);
 
             switch(employeeType) {
                 case `Intern`:
-                    console.log(`Running ${employeeType} prompt`);
-                    internPrompt();
+                    internPrompt(genEmpInfoAnswers);
                     break;
                 case `Manager`:
-                    console.log(`Run ${employeeType} Prompt`);
-                    managerPrompt();
+                    managerPrompt(genEmpInfoAnswers);
                     break;
                 case `Engineer`:
-                    console.log(`Run ${employeeType} Prompt`);
-                    engineerPrompt();
+                    engineerPrompt(genEmpInfoAnswers);
                     break;
                 default:
                     console.log(`Let's try this again (run the main prompt again)`);
@@ -100,7 +96,7 @@ const employeeTypePrompt = (genEmpInfoAnswers) => {
         })
 }
 
-const internPrompt = () => {
+const internPrompt = (basicEmpInfo) => {
     inquirer  
         .prompt([
             {
@@ -110,7 +106,12 @@ const internPrompt = () => {
             },
         ])
         .then(({internSchool}) => {
-            console.log(internSchool);
+            const intern = new Intern(employeeIDCounter, basicEmpInfo.employeeName, basicEmpInfo.employeeEmail, internSchool);
+
+            employeeIDCounter++;
+
+            console.log(`intern obj`, intern);
+
             enterEmployeeDataPrompt();
         })
         .catch((error) => {
@@ -123,7 +124,7 @@ const internPrompt = () => {
         })
 }
 
-const managerPrompt = () => {
+const managerPrompt = (basicEmpInfo) => {
     inquirer
         .prompt([
             {
@@ -133,7 +134,13 @@ const managerPrompt = () => {
             },
         ])
         .then(({mgrOfficeNum}) => {
-            console.log(mgrOfficeNum);
+            // console.log(mgrOfficeNum);
+            const manager = new Manager(employeeIDCounter, basicEmpInfo.employeeName, basicEmpInfo.employeeEmail, mgrOfficeNum);
+
+            employeeIDCounter++;
+
+            console.log(`new mgr obj`, manager);
+
             enterEmployeeDataPrompt();
         })
         .catch((error) => {
@@ -143,7 +150,7 @@ const managerPrompt = () => {
         })
 }
 
-const engineerPrompt = () => {
+const engineerPrompt = (basicEmpInfo) => {
     inquirer
         .prompt([
             {
@@ -153,7 +160,11 @@ const engineerPrompt = () => {
             }
         ])
         .then(({GHUser}) => {
-            console.log(GHUser);
+            const engineer = new Engineer(employeeIDCounter, basicEmpInfo.employeeName, basicEmpInfo.employeeEmail, GHUser);
+
+            employeeIDCounter++;
+
+            console.log(`engineer obj`, engineer);
             enterEmployeeDataPrompt();
         })
         .catch((error) => {
